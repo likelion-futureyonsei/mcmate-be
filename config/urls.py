@@ -27,6 +27,7 @@ urlpatterns = [
     path(API_PREFIX, include('apps.accounts.urls')),
     path(API_PREFIX, include('apps.products.urls')),
     path(API_PREFIX, include('apps.memories.urls')),
+    path(API_PREFIX, include('apps.storybooks.urls')),
 ]
 
 if settings.DEBUG:
