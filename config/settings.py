@@ -158,6 +158,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# POST /upload 가 저장하는 사진의 위치. media/ 는 .gitignore 에 이미 등록되어 있다.
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
