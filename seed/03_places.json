@@ -1,0 +1,32 @@
+[
+  {
+    "model": "memories.place",
+    "pk": 1,
+    "fields": {
+      "type": "store",
+      "name": "MCM 성수",
+      "address": "서울 성동구 성수동",
+      "lat": "37.544600",
+      "lng": "127.055900",
+      "radius": 200,
+      "storybook": 3,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "memories.place",
+    "pk": 2,
+    "fields": {
+      "type": "store",
+      "name": "MCM 명동 플래그십",
+      "address": "서울 중구 명동",
+      "lat": "37.563700",
+      "lng": "126.983800",
+      "radius": 200,
+      "storybook": 4,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z"
+    }
+  }
+]

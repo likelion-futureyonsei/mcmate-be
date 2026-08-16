@@ -1,0 +1,110 @@
+[
+  {
+    "model": "products.product",
+    "pk": 1,
+    "fields": {
+      "name": "비세토스 오리지널 반지갑",
+      "line": "비세토스 오리지널",
+      "pattern": "visetos",
+      "color": "cognac",
+      "product_code": "MCM-W-001",
+      "capacity": 10,
+      "warranty_months": 24,
+      "care_guide": "직사광선을 피해 더스트백에 보관하세요. 오염 시 부드러운 마른 천으로 닦아주세요.",
+      "image_url": "",
+      "storybook": 1,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 2,
+    "fields": {
+      "name": "큐빅 모노그램 카드지갑",
+      "line": "큐빅 모노그램",
+      "pattern": "cubic_monogram",
+      "color": "white",
+      "product_code": "MCM-W-002",
+      "capacity": 10,
+      "warranty_months": 24,
+      "care_guide": "밝은 색상 제품은 이염에 주의하세요.",
+      "image_url": "",
+      "storybook": 1,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 3,
+    "fields": {
+      "name": "비세토스 크로스바디백",
+      "line": "비세토스 오리지널",
+      "pattern": "visetos",
+      "color": "cognac",
+      "product_code": "MCM-C-001",
+      "capacity": 20,
+      "warranty_months": 24,
+      "care_guide": "스트랩 연결부를 주기적으로 점검하세요.",
+      "image_url": "",
+      "storybook": 1,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 4,
+    "fields": {
+      "name": "비세토스 벨트백",
+      "line": "비세토스 오리지널",
+      "pattern": "visetos",
+      "color": "pink",
+      "product_code": "MCM-C-002",
+      "capacity": 20,
+      "warranty_months": 24,
+      "care_guide": "장시간 압박 보관 시 형태가 변형될 수 있습니다.",
+      "image_url": "",
+      "storybook": 1,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 5,
+    "fields": {
+      "name": "로레토스 토트백",
+      "line": "로레토스",
+      "pattern": "lauretos",
+      "color": "silver",
+      "product_code": "MCM-T-001",
+      "capacity": 20,
+      "warranty_months": 24,
+      "care_guide": "메탈릭 소재는 스크래치에 주의하세요.",
+      "image_url": "",
+      "storybook": 1,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 6,
+    "fields": {
+      "name": "슈타크 백팩 스몰",
+      "line": "슈타크",
+      "pattern": "visetos",
+      "color": "black",
+      "product_code": "MCM-B-001",
+      "capacity": 30,
+      "warranty_months": 24,
+      "care_guide": "스터드 장식이 다른 가죽 제품에 닿지 않게 보관하세요.",
+      "image_url": "",
+      "storybook": 2,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z"
+    }
+  }
+]
