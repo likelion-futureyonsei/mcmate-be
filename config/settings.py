@@ -37,7 +37,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # mcmate 앱. API 명세서 목차와 1:1로 대응한다.
+    'apps.common',      # 0장 응답 공통 규칙
+    'apps.accounts',    # 1·2장 사용자
+    'apps.characters',  # 2장 캐릭터
+    'apps.products',    # 3장 제품
+    'apps.memories',    # 4장 추억구슬
+    'apps.storybooks',  # 5장 스토리북
 ]
+
+# 명세 7장 users 테이블을 Django 인증의 기본 유저로 지정한다.
+# Django 기본 User 는 username 로그인이라 이메일 로그인 명세와 맞지 않고,
+# nickname/birth/phone/약관 동의/알림 설정을 담을 자리도 없다.
+# 이 설정은 첫 migrate 이후에는 사실상 변경이 불가능하다.
+AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
