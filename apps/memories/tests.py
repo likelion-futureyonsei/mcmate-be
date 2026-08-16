@@ -157,6 +157,82 @@ class UnlockTests(MemoryTestBase):
         self.assertNotIn(self.place_sb.id, storybook_ids)
 
 
+class MemoryReadTests(MemoryTestBase):
+    """GET /memories, GET /memories/:memoryID — 조회 (이슈 #8)"""
+
+    def setUp(self):
+        super().setUp()
+        self.product.capacity = 100  # 조회 테스트에서 용량에 걸리지 않게
+        self.product.save()
+        others_product = UserProduct.objects.create(
+            owner=self.other, product=self.product, serial_no="SN-9999"
+        )
+        self.my_public = Memory.objects.create(
+            owner=self.me, user_product=self.mine, visibility="public",
+            lat=Decimal(SEONGSU["lat"]), lng=Decimal(SEONGSU["lng"]), place_name="성수",
+        )
+        self.my_private = Memory.objects.create(
+            owner=self.me, user_product=self.mine, visibility="private",
+            lat=Decimal(FAR_AWAY["lat"]), lng=Decimal(FAR_AWAY["lng"]), place_name="멀리",
+        )
+        self.others_public = Memory.objects.create(
+            owner=self.other, user_product=others_product, visibility="public",
+            lat=Decimal(SEONGSU["lat"]), lng=Decimal(SEONGSU["lng"]), place_name="성수",
+        )
+        self.others_private = Memory.objects.create(
+            owner=self.other, user_product=others_product, visibility="private",
+            lat=Decimal(SEONGSU["lat"]), lng=Decimal(SEONGSU["lng"]), place_name="성수",
+        )
+
+    def test_목록에_타인의_비공개는_보이지_않는다(self):
+        response = self.client.get("/api/v1/memories")
+
+        ids = {item["id"] for item in response.data}
+        self.assertEqual(ids, {self.my_public.id, self.my_private.id, self.others_public.id})
+
+    def test_owner_필터는_그_유저의_공개_추억만_준다(self):
+        response = self.client.get(f"/api/v1/memories?owner={self.other.id}")
+
+        ids = {item["id"] for item in response.data}
+        self.assertEqual(ids, {self.others_public.id})
+
+    def test_product_id_필터가_동작한다(self):
+        response = self.client.get(f"/api/v1/memories?product_id={self.mine.id}")
+
+        ids = {item["id"] for item in response.data}
+        self.assertEqual(ids, {self.my_public.id, self.my_private.id})
+
+    def test_지도_반경_필터가_동작한다(self):
+        response = self.client.get(
+            f"/api/v1/memories?lat={SEONGSU['lat']}&lng={SEONGSU['lng']}&radius=500"
+        )
+
+        ids = {item["id"] for item in response.data}
+        # 성수 좌표의 것만 — 11km 밖(my_private)은 제외
+        self.assertEqual(ids, {self.my_public.id, self.others_public.id})
+
+    def test_반경_필터_값이_숫자가_아니면_400이다(self):
+        response = self.client.get("/api/v1/memories?lat=abc&lng=127&radius=500")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_상세는_owner를_포함한다(self):
+        response = self.client.get(f"/api/v1/memories/{self.others_public.id}")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["owner"], self.other.id)
+
+    def test_타인의_비공개_상세는_403이다(self):
+        response = self.client.get(f"/api/v1/memories/{self.others_private.id}")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_내_비공개_상세는_보인다(self):
+        response = self.client.get(f"/api/v1/memories/{self.my_private.id}")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
 class UploadTests(APITestCase):
     """POST /upload — 사진 업로드 (Control Resource)"""
 
