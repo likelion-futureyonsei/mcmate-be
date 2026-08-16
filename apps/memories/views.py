@@ -13,7 +13,7 @@ from apps.common.links import next_journey_link, unlocked_chapter_link
 from apps.common.permissions import IsOwnerOrReadOnlyIfPublic
 
 from .models import Memory
-from .serializers import MemoryCreateSerializer, MemorySerializer
+from .serializers import MemoryCreateSerializer, MemorySerializer, MemoryUpdateSerializer
 from .services import distance_m, process_unlocks
 
 
@@ -115,13 +115,23 @@ class MemoryListCreateView(generics.ListCreateAPIView):
         )
 
 
-class MemoryDetailView(generics.RetrieveAPIView):
-    """GET /memories/:memoryID — 추억구슬 상세 (Element URI).
+class MemoryDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """GET    /memories/:memoryID — 상세 (작성자 식별용 owner 포함, 명세 4장)
+    PATCH  /memories/:memoryID — 부분 수정 (본인 것만)
+    DELETE /memories/:memoryID — 삭제, 204 No Content (본인 것만)
 
-    응답에 작성자 식별용 owner 필드 포함 ("작성자 캐릭터 보기" 연결용, 명세 4장).
-    본인 것은 전부, 타인 것은 공개(public)만 — 비공개면 403.
+    조회는 본인 전부 + 타인 공개만. 수정·삭제는 본인만 (권한은 토큰 기준 판정).
     """
 
     queryset = Memory.objects.select_related("user_product")
-    serializer_class = MemorySerializer
     permission_classes = [IsOwnerOrReadOnlyIfPublic]
+    http_method_names = ["get", "patch", "delete", "head", "options"]
+
+    def get_serializer_class(self):
+        return MemoryUpdateSerializer if self.request.method == "PATCH" else MemorySerializer
+
+    def update(self, request, *args, **kwargs):
+        kwargs["partial"] = True  # PUT 없이 항상 부분 수정
+        super().update(request, *args, **kwargs)
+        # 수정 응답도 조회와 같은 전체 형태로 돌려준다
+        return Response(MemorySerializer(self.get_object()).data)

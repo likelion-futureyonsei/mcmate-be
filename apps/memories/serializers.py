@@ -52,3 +52,19 @@ class MemoryCreateSerializer(serializers.ModelSerializer):
             self.fields["user_product_id"].queryset = UserProduct.objects.filter(
                 owner=request.user
             )
+
+
+class MemoryUpdateSerializer(serializers.ModelSerializer):
+    """PATCH /memories/:memoryID 입력.
+
+    수정 가능한 것은 사진·장소명·글·공개 설정뿐이다.
+    좌표와 담긴 제품은 "그때 그 자리"의 기록이므로 바꿀 수 없다.
+    """
+
+    photo_key = serializers.CharField(
+        source="photo", required=False, allow_blank=True, max_length=255
+    )
+
+    class Meta:
+        model = Memory
+        fields = ["photo_key", "place_name", "note", "visibility"]

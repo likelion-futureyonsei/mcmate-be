@@ -265,3 +265,65 @@ class UploadTests(APITestCase):
         response = self.client.post("/api/v1/upload", {}, format="multipart")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class MemoryModifyTests(MemoryTestBase):
+    """PATCH / DELETE /memories/:memoryID — 이슈 #9"""
+
+    def setUp(self):
+        super().setUp()
+        self.memory = Memory.objects.create(
+            owner=self.me, user_product=self.mine, visibility="public",
+            lat=Decimal(SEONGSU["lat"]), lng=Decimal(SEONGSU["lng"]), note="원본",
+        )
+
+    def test_본인_추억을_부분_수정할_수_있다(self):
+        response = self.client.patch(
+            f"/api/v1/memories/{self.memory.id}",
+            {"note": "고친 글", "visibility": "private"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.memory.refresh_from_db()
+        self.assertEqual(self.memory.note, "고친 글")
+        self.assertEqual(self.memory.visibility, "private")
+
+    def test_좌표와_담긴_제품은_수정되지_않는다(self):
+        """추억은 "그때 그 자리"의 기록 — 위치·제품 변경은 무시된다."""
+        original_lat = self.memory.lat
+        response = self.client.patch(
+            f"/api/v1/memories/{self.memory.id}",
+            {"lat": "35.0", "user_product_id": 999},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.memory.refresh_from_db()
+        self.assertEqual(self.memory.lat, original_lat)
+        self.assertEqual(self.memory.user_product_id, self.mine.id)
+
+    def test_타인_추억_수정은_403이다(self):
+        self.client.force_authenticate(self.other)
+
+        response = self.client.patch(
+            f"/api/v1/memories/{self.memory.id}", {"note": "해킹"}, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.memory.refresh_from_db()
+        self.assertEqual(self.memory.note, "원본")
+
+    def test_삭제는_204이고_실제로_사라진다(self):
+        response = self.client.delete(f"/api/v1/memories/{self.memory.id}")
+
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Memory.objects.filter(pk=self.memory.pk).exists())
+
+    def test_타인_추억_삭제는_403이다(self):
+        self.client.force_authenticate(self.other)
+
+        response = self.client.delete(f"/api/v1/memories/{self.memory.id}")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertTrue(Memory.objects.filter(pk=self.memory.pk).exists())

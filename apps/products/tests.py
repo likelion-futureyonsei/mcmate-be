@@ -181,3 +181,34 @@ class RecommendTests(ProductTestBase):
         response = self.client.get("/api/v1/recommend")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class UserProductDetailTests(ProductTestBase):
+    """GET /products/:productID — 제품 상세 (이슈 #9)"""
+
+    def setUp(self):
+        super().setUp()
+        self.mine = UserProduct.objects.create(
+            owner=self.me, product=self.wallet, serial_no="SN-0001"
+        )
+
+    def test_본인_제품_상세에_보증기간과_용량이_나온다(self):
+        response = self.client.get(f"/api/v1/products/{self.mine.id}")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["product"]["warranty_months"], 24)
+        self.assertEqual(response.data["capacity"], {"used": 0, "total": 10})
+        self.assertIn("care_guide", response.data["product"])
+        self.assertIn("storybook", response.data["product"])
+
+    def test_타인_제품_상세는_403이다(self):
+        self.client.force_authenticate(self.other)
+
+        response = self.client.get(f"/api/v1/products/{self.mine.id}")
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_없는_제품은_404다(self):
+        response = self.client.get("/api/v1/products/999999")
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
