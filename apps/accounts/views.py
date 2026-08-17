@@ -39,12 +39,7 @@ class UserCreateView(generics.CreateAPIView):
 
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
-    """GET /users/:userID — 유저 조회 (Element URI)
-    PATCH /users/:userID — 알림 설정 토글 및 개인정보 부분 수정
-
-    본인이면 전체, 타인이면 공개 정보만 내려준다.
-    판정은 URL 의 :userID 가 아니라 **토큰에서 꺼낸 request.user.id** 로 한다.
-    """
+    """GET·PATCH /users/:userID — 본인=전체, 타인=공개 정보만 (판정은 토큰 기준)."""
 
     queryset = User.objects.select_related("character")
     http_method_names = ["get", "patch", "head", "options"]
@@ -62,11 +57,7 @@ class UserDetailView(generics.RetrieveUpdateAPIView):
 
 
 class TokenView(APIView):
-    """POST /tokens — 로그인 (Collection URI: 토큰 발급)
-    DELETE /tokens — 로그아웃 (발급된 토큰 무효화)
-
-    도한님 피드백대로 `/auth` 가 아니라 리소스 관점의 `/tokens` 를 쓴다.
-    """
+    """POST /tokens 로그인 / DELETE /tokens 로그아웃 (토큰 무효화)."""
 
     def get_permissions(self):
         return [IsAuthenticated()] if self.request.method == "DELETE" else [AllowAny()]

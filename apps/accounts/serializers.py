@@ -8,11 +8,7 @@ from .models import User
 
 
 class CharacterBriefSerializer(serializers.ModelSerializer):
-    """유저 조회에 곁들이는 캐릭터 요약. 타인 프로필(뷰어)에서도 이 정도만 보인다.
-
-    캐릭터 앱의 코드가 아니라 모델만 참조한다.
-    캐릭터 API(생성·수정·조회)는 apps/characters 안에서 별도로 구현된다.
-    """
+    """유저 조회에 싣는 캐릭터 요약 — 모델만 참조, 캐릭터 API 는 apps/characters."""
 
     class Meta:
         model = Character
@@ -78,9 +74,7 @@ class UserSelfSerializer(serializers.ModelSerializer):
             "character",
             "created_at",
         ]
-        # 이메일은 로그인 아이디라 변경 대상이 아니고,
-        # 개인정보 수집 동의(agree_data)는 철회 = 탈퇴이므로 PATCH 로 끄지 못하게 막는다.
-        # 마케팅 수신 동의(agree_marketing)와 알림 3종은 설정 화면에서 자유롭게 토글한다.
+        # agree_data 철회는 탈퇴로만 — PATCH 로 끌 수 없다 (배경은 PR #2 참고)
         read_only_fields = ["id", "email", "agree_data", "created_at"]
 
 
@@ -95,11 +89,7 @@ class UserPublicSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(TokenObtainPairSerializer):
-    """POST /tokens — 로그인.
-
-    명세대로 `access_token` / `refresh_token` 이름으로 내려주고, User ID 를 함께 준다.
-    프론트는 이 user_id 를 저장해 이후 `?owner={userID}` 로 쓴다.
-    """
+    """POST /tokens — 로그인. 토큰 2종 + user_id 반환 (명세 1장)."""
 
     username_field = User.USERNAME_FIELD
 
@@ -118,14 +108,9 @@ class LoginSerializer(TokenObtainPairSerializer):
 
 
 class RefreshSerializer(TokenRefreshSerializer):
-    """POST /tokens/refresh — access_token 재발급.
+    """POST /tokens/refresh — 재발급. 필드명만 명세(refresh_token)에 맞춘다."""
 
-    토큰 회전·블랙리스트 처리는 simplejwt 의 검증된 구현을 그대로 쓰고,
-    바깥에 드러나는 필드 이름만 명세(`refresh_token`)에 맞춘다.
-    """
-
-    # 부모가 선언한 `refresh` 필드를 지운다. 내부 이름이 에러 메시지로 새어 나가면 안 된다.
-    refresh = None
+    refresh = None  # 부모의 내부 필드명이 에러 메시지로 새지 않게 제거
 
     refresh_token = serializers.CharField(
         write_only=True,
