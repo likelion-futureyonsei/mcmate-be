@@ -85,9 +85,7 @@ class RecommendView(APIView):
         base = current.product
         candidates = Product.objects.exclude(pk=base.pk)
 
-        # 같은 라인 상위 용량 > 더 큰 용량 > 그 외 순으로 추천이 비지 않게 한다
-        same_line_up = [p for p in candidates if p.line == base.line and p.capacity >= base.capacity]
-        bigger = [p for p in candidates if p.capacity > base.capacity]
-        picks = same_line_up or bigger or list(candidates)
-        picks = sorted(picks, key=lambda p: p.capacity)[: self.LIMIT]
+        # 더 큰 용량 우선, 없으면 나머지에서 추천
+        bigger = candidates.filter(capacity__gt=base.capacity)
+        picks = (bigger or candidates).order_by("capacity")[: self.LIMIT]
         return Response(ProductSerializer(picks, many=True).data)
