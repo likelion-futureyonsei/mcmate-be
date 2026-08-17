@@ -4,8 +4,6 @@ from .models import Product, UserProduct
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    """제품 마스터. GET /recommend 응답에도 그대로 쓰인다."""
-
     class Meta:
         model = Product
         fields = [
@@ -24,11 +22,6 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class UserProductSerializer(serializers.ModelSerializer):
-    """보유 제품 — 목록·등록 응답.
-
-    명세 3장: 남은 용량 게이지와 추억 수를 함께 내려준다.
-    """
-
     product = ProductSerializer(read_only=True)
     capacity = serializers.SerializerMethodField()
     memory_count = serializers.SerializerMethodField()
@@ -47,13 +40,6 @@ class UserProductSerializer(serializers.ModelSerializer):
 
 
 class UserProductCreateSerializer(serializers.ModelSerializer):
-    """POST /products 입력.
-
-    serial_no 를 모델 필드 그대로 두면 unique 검증이 400 을 돌려주는데,
-    명세는 시리얼 충돌을 409(도메인 충돌)로 구분하므로
-    여기서는 형식 검사만 하고 중복 판정은 뷰에서 한다.
-    """
-
     product_id = serializers.PrimaryKeyRelatedField(
         queryset=Product.objects.all(),
         source="product",
