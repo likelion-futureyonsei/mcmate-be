@@ -4,8 +4,6 @@ from apps.common.models import TimeStampedModel
 
 
 class Place(TimeStampedModel):
-    """명세 7장 places — 특별 장소 (시드). API 는 보류지만 해금 판정에 필요해 유지."""
-
     class Type(models.TextChoices):
         CITY = "city", "도시"
         STORE = "store", "매장"
@@ -33,8 +31,6 @@ class Place(TimeStampedModel):
 
 
 class Memory(TimeStampedModel):
-    """명세 7장 memories — 추억구슬."""
-
     class Visibility(models.TextChoices):
         PUBLIC = "public", "공개"
         PRIVATE = "private", "비공개"

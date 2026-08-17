@@ -4,8 +4,6 @@ from apps.common.models import TimeStampedModel
 
 
 class Character(TimeStampedModel):
-    """명세 7장 characters — 유저당 1개(1:1)."""
-
     class Doll(models.TextChoices):
         BEARBRICK = "bearbrick", "베어브릭"
         RABBIT = "rabbit", "토끼"
@@ -27,7 +25,7 @@ class Character(TimeStampedModel):
     owner = models.OneToOneField(
         "accounts.User", on_delete=models.CASCADE, related_name="character", verbose_name="소유자"
     )
-    doll_type = models.CharField("인형", max_length=20, choices=Doll.choices)
+    doll = models.CharField("인형", max_length=20, choices=Doll.choices)
     pattern = models.CharField("패턴", max_length=20, choices=Pattern.choices)
     color = models.CharField("색상", max_length=20, choices=Color.choices)
     equipped_product = models.ForeignKey(
@@ -46,4 +44,4 @@ class Character(TimeStampedModel):
         verbose_name_plural = "캐릭터"
 
     def __str__(self):
-        return f"{self.owner.nickname}의 {self.get_doll_type_display()}"
+        return f"{self.owner.nickname}의 {self.get_doll_display()}"

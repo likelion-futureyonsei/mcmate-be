@@ -5,8 +5,6 @@ from .models import Product, UserProduct
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    """제품 마스터 시드 입력용."""
-
     list_display = ["id", "name", "product_code", "line", "color", "capacity", "storybook"]
     list_filter = ["line", "pattern", "color"]
     search_fields = ["name", "product_code"]

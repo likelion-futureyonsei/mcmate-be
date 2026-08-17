@@ -4,8 +4,6 @@ from apps.common.models import TimeStampedModel
 
 
 class Storybook(TimeStampedModel):
-    """명세 7장 storybooks (시드). scope: product=작성 수 해금 / place=방문 해금."""
-
     class Scope(models.TextChoices):
         PRODUCT = "product", "제품"
         PLACE = "place", "특별 장소"
@@ -24,8 +22,6 @@ class Storybook(TimeStampedModel):
 
 
 class Chapter(TimeStampedModel):
-    """명세 7장 chapters (시드). required_memories 개 이상 담으면 열린다."""
-
     storybook = models.ForeignKey(
         Storybook, on_delete=models.CASCADE, related_name="chapters", verbose_name="스토리북"
     )
@@ -52,8 +48,6 @@ class Chapter(TimeStampedModel):
 
 
 class Unlock(models.Model):
-    """명세 7장 unlocks — 유저별 챕터 해금 이력."""
-
     user = models.ForeignKey(
         "accounts.User", on_delete=models.CASCADE, related_name="unlocks", verbose_name="유저"
     )
