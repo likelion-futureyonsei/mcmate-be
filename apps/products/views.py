@@ -48,14 +48,6 @@ class ProductListCreateView(generics.ListCreateAPIView):
 
 
 class UserProductDetailView(generics.RetrieveAPIView):
-    """GET /products/:productID — 제품 상세 (Element URI).
-
-    보증 기간·보관법·남은 용량·연관 스토리북 ID (명세 3장).
-    홈 화면 상단 용량 표시는 캐릭터가 장착 중인 제품 하나의 값 — 프론트는
-    characters 의 equipped_product 로 이 주소를 호출한다.
-    시리얼이 포함되므로 본인 것만 조회 가능.
-    """
-
     queryset = UserProduct.objects.select_related("product__storybook")
     serializer_class = UserProductSerializer
     permission_classes = [IsOwner]

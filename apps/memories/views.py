@@ -17,12 +17,6 @@ from .services import distance_m, process_unlocks
 
 
 class UploadView(APIView):
-    """POST /upload — 추억 사진 업로드 (Control Resource).
-
-    저장된 객체의 key 를 돌려주고, 프론트는 그 key 를 POST /memories 의
-    photo_key 로 보낸다. 제품 등록에는 사용하지 않는다 (명세 1장).
-    """
-
     parser_classes = [MultiPartParser, FormParser]
     MAX_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -44,18 +38,6 @@ class UploadView(APIView):
 
 
 class MemoryListCreateView(generics.ListCreateAPIView):
-    """POST /memories — 추억 작성 (명세 4장, 서비스의 심장)
-    GET  /memories — 추억 조회 (쿼리 파라미터 필터링)
-
-    [작성 서버 로직]
-    ① 용량 체크 (가득 차면 409)
-    ② 특별 장소 좌표 매칭 해금  ③ 작성 수 기준 챕터 해금   -> services.process_unlocks
-    ④ 해금 정보를 unlocked 로 포함해 201 Created
-
-    [조회 필터] ?lat=&lng=&radius= (지도 주변) / ?product_id= / ?owner={userID}
-    타 유저의 추억은 공개(public) 설정된 것만 보인다.
-    """
-
     def get_serializer_class(self):
         return MemoryCreateSerializer if self.request.method == "POST" else MemorySerializer
 
@@ -87,16 +69,16 @@ class MemoryListCreateView(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         user_product = serializer.validated_data["user_product"]
 
-        # ① 용량 체크 — 명세 8장의 409 응답 그대로
+        # 용량 체크
         if user_product.is_full:
             raise DomainConflict("이 제품의 추억이 가득 찼습니다.")
 
         memory = serializer.save(owner=request.user)
 
-        # ②③ 해금 판정
+        # 해금 판정
         unlocked = process_unlocks(memory)
 
-        # ④ 응답 — 명세 8장 예시 형태
+        # 응답 구성
         payload = {
             "id": memory.id,
             "created_at": memory.created_at.isoformat(),
@@ -111,13 +93,6 @@ class MemoryListCreateView(generics.ListCreateAPIView):
 
 
 class MemoryDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """GET    /memories/:memoryID — 상세 (작성자 식별용 owner 포함, 명세 4장)
-    PATCH  /memories/:memoryID — 부분 수정 (본인 것만)
-    DELETE /memories/:memoryID — 삭제, 204 No Content (본인 것만)
-
-    조회는 본인 전부 + 타인 공개만. 수정·삭제는 본인만 (권한은 토큰 기준 판정).
-    """
-
     queryset = Memory.objects.select_related("user_product")
     permission_classes = [IsOwnerOrReadOnlyIfPublic]
     http_method_names = ["get", "patch", "delete", "head", "options"]
