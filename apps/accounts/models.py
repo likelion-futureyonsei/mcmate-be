@@ -33,7 +33,7 @@ class User(AbstractBaseUser, TimeStampedModel):
     agree_data = models.BooleanField("개인정보 수집·이용 동의", default=False)
     agree_marketing = models.BooleanField("마케팅 수신 동의", default=False)
 
-    notify_memory = models.BooleanField("근처 추억구슬 알림", default=True)
+    notify_memory = models.BooleanField("근처 추억 알림", default=True)
     notify_place = models.BooleanField("특별 장소 알림", default=True)
     notify_ad = models.BooleanField("광고성 알림", default=False)
 

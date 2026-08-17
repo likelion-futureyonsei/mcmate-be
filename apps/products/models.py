@@ -10,7 +10,7 @@ class Product(TimeStampedModel):
     color = models.CharField("색상", max_length=50, blank=True)
     product_code = models.CharField("제품 코드", max_length=50, unique=True)
     capacity = models.PositiveIntegerField(
-        "추억구슬 용량", default=20, help_text="이 제품에 담을 수 있는 추억구슬 개수"
+        "추억 용량", default=20, help_text="이 제품에 담을 수 있는 추억 개수"
     )
     warranty_months = models.PositiveIntegerField("보증 기간(개월)", default=24)
     care_guide = models.TextField("보관법", blank=True)
