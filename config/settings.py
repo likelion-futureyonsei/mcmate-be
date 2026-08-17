@@ -10,17 +10,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# .env
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3m^vxk()xzkngta0$u8$wnt^e=je-!kc6dq7n-v0*s-f4c66)_'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -38,6 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',  # DELETE /tokens (로그아웃 무효화)
+
     # mcmate 앱. API 명세서 목차와 1:1로 대응한다.
     'apps.common',      # 0장 응답 공통 규칙
     'apps.accounts',    # 1·2장 사용자
@@ -49,6 +57,31 @@ INSTALLED_APPS = [
 
 # 이메일 로그인 커스텀 유저 (첫 migrate 이후 변경 불가 — 배경은 PR #1 참고)
 AUTH_USER_MODEL = 'accounts.User'
+
+# 명세 0장(응답 공통 규칙)을 코드로 옮긴 자리. 자세한 구현은 apps/common 에 있다.
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',),
+    'DEFAULT_PAGINATION_CLASS': 'apps.common.pagination.HeaderLimitOffsetPagination',
+    'PAGE_SIZE': 20,
+    'ORDERING_PARAM': 'order',  # 명세: ?order=-key
+    'EXCEPTION_HANDLER': 'apps.common.exceptions.api_exception_handler',
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=12),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+}
+
+# 명세: URI 는 끝에 `/` 없음. Django 기본값(True)은 슬래시를 붙여 재시도한다.
+APPEND_SLASH = False
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -113,9 +146,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ko-kr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
