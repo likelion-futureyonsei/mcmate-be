@@ -9,7 +9,7 @@ class UserManager(BaseUserManager):
 
     use_in_migrations = True
 
-    def _create_user(self, email, password, **extra):
+    def create_user(self, email, password=None, **extra):
         if not email:
             raise ValueError("이메일은 필수입니다.")
         user = self.model(email=self.normalize_email(email), **extra)
@@ -17,15 +17,12 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extra):
-        return self._create_user(email, password, **extra)
-
     def create_superuser(self, email, password=None, **extra):
         # admin 로그인 조건: is_staff(접근 허용) + is_superuser(전체 권한)
         extra["is_staff"] = True
         extra["is_superuser"] = True
         extra.setdefault("nickname", "admin")
-        return self._create_user(email, password, **extra)
+        return self.create_user(email, password, **extra)
 
 
 class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
