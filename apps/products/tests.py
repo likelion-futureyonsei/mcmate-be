@@ -144,7 +144,7 @@ class RecommendTests(ProductTestBase):
 
     def test_캐릭터_추천은_패턴_일치를_우선한다(self):
         character = Character.objects.create(
-            owner=self.me, doll_type="rabbit", pattern="visetos", color="cognac"
+            owner=self.me, doll="rabbit", pattern="visetos", color="cognac"
         )
 
         response = self.client.get(f"/api/v1/recommend?character_id={character.id}")

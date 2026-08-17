@@ -4,11 +4,6 @@ from apps.common.models import TimeStampedModel
 
 
 class Product(TimeStampedModel):
-    """명세 7장 products 테이블. MCM 제품 마스터 — 관리자가 시드로 넣는다.
-
-    유저가 "소유"하는 것은 이 테이블이 아니라 UserProduct 다.
-    """
-
     name = models.CharField("제품명", max_length=100)
     line = models.CharField("라인", max_length=50, blank=True)
     pattern = models.CharField("패턴", max_length=50, blank=True)
@@ -39,11 +34,6 @@ class Product(TimeStampedModel):
 
 
 class UserProduct(TimeStampedModel):
-    """명세 7장 user_products 테이블. 누가 어떤 시리얼을 소유하는지.
-
-    시리얼 번호는 전역 unique — 이미 등록된 시리얼은 409 Conflict.
-    """
-
     owner = models.ForeignKey(
         "accounts.User", on_delete=models.CASCADE, related_name="products", verbose_name="소유자"
     )
