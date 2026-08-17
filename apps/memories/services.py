@@ -1,4 +1,4 @@
-"""추억구슬 작성 시 스토리북 해금 판정 (명세 4장 POST /memories 서버 로직 ②③).
+"""추억 작성 시 스토리북 해금 판정 (명세 4장 POST /memories 서버 로직 ②③).
 
 뷰가 아니라 여기에 두는 이유: 해금 조건은 "우리 서비스만의 규칙"이라
 기획이 바뀌면 이 파일만 고치면 된다. 뷰는 요청/응답 형식만 담당한다.
@@ -35,7 +35,7 @@ def _unlock(user, chapter, reason: str, unlocked: list) -> None:
 
 
 def process_unlocks(memory: Memory) -> list[dict]:
-    """방금 만든 추억구슬 기준으로 열리는 챕터를 전부 판정한다.
+    """방금 만든 추억 기준으로 열리는 챕터를 전부 판정한다.
 
     반환: [{"storybook_id", "chapter_no", "reason"}] — 이번에 새로 열린 것만.
     reason 은 명세 8장 응답 예시의 "memory_count" 와, 장소 해금용 "place_visit".

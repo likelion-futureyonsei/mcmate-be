@@ -17,7 +17,7 @@ from .services import distance_m, process_unlocks
 
 
 class UploadView(APIView):
-    """POST /upload — 추억구슬 사진 업로드 (Control Resource).
+    """POST /upload — 추억 사진 업로드 (Control Resource).
 
     저장된 객체의 key 를 돌려주고, 프론트는 그 key 를 POST /memories 의
     photo_key 로 보낸다. 제품 등록에는 사용하지 않는다 (명세 1장).
@@ -44,8 +44,8 @@ class UploadView(APIView):
 
 
 class MemoryListCreateView(generics.ListCreateAPIView):
-    """POST /memories — 추억구슬 작성 (명세 4장, 서비스의 심장)
-    GET  /memories — 추억구슬 조회 (쿼리 파라미터 필터링)
+    """POST /memories — 추억 작성 (명세 4장, 서비스의 심장)
+    GET  /memories — 추억 조회 (쿼리 파라미터 필터링)
 
     [작성 서버 로직]
     ① 용량 체크 (가득 차면 409)
@@ -89,7 +89,7 @@ class MemoryListCreateView(generics.ListCreateAPIView):
 
         # ① 용량 체크 — 명세 8장의 409 응답 그대로
         if user_product.is_full:
-            raise DomainConflict("이 제품의 추억구슬이 가득 찼습니다.")
+            raise DomainConflict("이 제품의 추억이 가득 찼습니다.")
 
         memory = serializer.save(owner=request.user)
 

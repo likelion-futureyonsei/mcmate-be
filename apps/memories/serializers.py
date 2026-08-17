@@ -6,7 +6,7 @@ from .models import Memory
 
 
 class MemorySerializer(serializers.ModelSerializer):
-    """추억구슬 조회 응답. owner 는 "작성자 캐릭터 보기" 연결용 (명세 4장)."""
+    """추억 조회 응답. owner 는 "작성자 캐릭터 보기" 연결용 (명세 4장)."""
 
     class Meta:
         model = Memory
