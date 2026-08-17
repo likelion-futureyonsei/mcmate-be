@@ -27,7 +27,7 @@ class UserCreateView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        # 명세 0장: 생성 성공은 201 + Location 헤더 + 생성된 리소스 본문
+        # 생성 성공: 201 + Location 헤더 + 생성된 리소스
         return Response(
             UserSelfSerializer(user).data,
             status=status.HTTP_201_CREATED,
