@@ -7,8 +7,8 @@ from .models import User
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     ordering = ["-created_at"]
-    list_display = ["id", "email", "nickname", "is_staff", "created_at"]
-    list_filter = ["is_staff", "is_active", "agree_marketing"]
+    list_display = ["id", "email", "nickname", "is_admin", "created_at"]
+    list_filter = ["is_admin", "is_active", "agree_marketing"]
     search_fields = ["email", "nickname", "phone"]
     readonly_fields = ["last_login", "created_at", "updated_at"]
 
@@ -19,10 +19,11 @@ class UserAdmin(BaseUserAdmin):
         ("알림 설정", {"fields": ("notify_memory", "notify_place", "notify_ad")}),
         (
             "권한",
-            {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")},
+            {"fields": ("is_active", "is_admin")},
         ),
         ("기록", {"fields": ("last_login", "created_at", "updated_at")}),
     )
+
     add_fieldsets = (
         (
             None,
@@ -32,3 +33,5 @@ class UserAdmin(BaseUserAdmin):
             },
         ),
     )
+
+    filter_horizontal = ()

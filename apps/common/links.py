@@ -1,8 +1,4 @@
-"""명세 0장 "다음 행동 안내"(links[]) 를 만드는 헬퍼.
-
-해금·구매 제안처럼 후속 동작이 있는 응답은 아래 형태를 따른다.
-    {"rel": ..., "href": ..., "method": ..., "description": ...}
-"""
+"""다음 행동 안내 links[] 헬퍼 — {rel, href, method, description} (명세 0장)."""
 
 
 def link(rel: str, href: str, description: str, method: str = "GET") -> dict:
