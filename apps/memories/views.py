@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.common.exceptions import DomainConflict
-from apps.common.links import next_journey_link, unlocked_chapter_link
 
 from .serializers import MemoryCreateSerializer, MemorySerializer
 from .services import process_unlocks
@@ -44,9 +43,9 @@ class UploadView(APIView):
 class MemoryCreateView(generics.CreateAPIView):
     """POST /memories — 추억구슬 작성 (명세 4장, 서비스의 심장).
 
-    ① 용량 체크 (가득 차면 409 + 다음 제품 추천 links)
+    ① 용량 체크 (가득 차면 409)
     ② 특별 장소 좌표 매칭 해금  ③ 작성 수 기준 챕터 해금   -> services.process_unlocks
-    ④ 해금 정보를 links 로 포함해 201 Created
+    ④ 해금 정보를 unlocked 로 포함해 201 Created
     """
 
     serializer_class = MemoryCreateSerializer
@@ -58,10 +57,7 @@ class MemoryCreateView(generics.CreateAPIView):
 
         # ① 용량 체크 — 명세 8장의 409 응답 그대로
         if user_product.is_full:
-            raise DomainConflict(
-                "이 제품의 추억구슬이 가득 찼습니다.",
-                links=[next_journey_link(user_product.id)],
-            )
+            raise DomainConflict("이 제품의 추억구슬이 가득 찼습니다.")
 
         memory = serializer.save(owner=request.user)
 
@@ -74,7 +70,6 @@ class MemoryCreateView(generics.CreateAPIView):
             "created_at": memory.created_at.isoformat(),
             "capacity": {"used": user_product.capacity_used, "total": user_product.capacity_total},
             "unlocked": unlocked,
-            "links": [unlocked_chapter_link(u["storybook_id"]) for u in unlocked],
         }
         return Response(
             payload,

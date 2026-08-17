@@ -106,7 +106,7 @@ class MemoryCreateTests(MemoryTestBase):
 class CapacityTests(MemoryTestBase):
     """서버 로직 ① — 용량 체크"""
 
-    def test_용량이_가득_차면_409와_다음_여정_추천_links를_준다(self):
+    def test_용량이_가득_차면_409다(self):
         self.write_memory()
         self.write_memory()  # capacity 2 소진
 
@@ -114,9 +114,6 @@ class CapacityTests(MemoryTestBase):
 
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
         self.assertIn("가득", response.data["message"])
-        links = response.data["links"]
-        self.assertEqual(links[0]["rel"], "next-journey")
-        self.assertIn(f"product_id={self.mine.id}", links[0]["href"])
         self.assertEqual(Memory.objects.count(), 2)  # 세 번째는 저장되지 않아야 한다
 
 
@@ -131,7 +128,6 @@ class UnlockTests(MemoryTestBase):
             unlocked,
             [{"storybook_id": self.product_sb.id, "chapter_no": 1, "reason": "memory_count"}],
         )
-        self.assertEqual(response.data["links"][0]["rel"], "unlocked-chapter")
         self.assertTrue(
             Unlock.objects.filter(user=self.me, chapter__chapter_no=1).exists()
         )
