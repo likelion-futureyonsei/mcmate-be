@@ -4,13 +4,6 @@ from apps.common.models import TimeStampedModel
 
 
 class Place(TimeStampedModel):
-    """명세 7장 places 테이블. 시드 데이터.
-
-    v0.5 에서 `GET /places` 는 보류됐지만 **테이블은 유지**한다.
-    해금 판정(POST /memories 내부 로직)에 반드시 필요하기 때문.
-    지도 노출이 결정되면 조회 API 만 되살리면 된다.
-    """
-
     class Type(models.TextChoices):
         CITY = "city", "도시"
         STORE = "store", "매장"
@@ -38,8 +31,6 @@ class Place(TimeStampedModel):
 
 
 class Memory(TimeStampedModel):
-    """명세 7장 memories 테이블. 추억구슬."""
-
     class Visibility(models.TextChoices):
         PUBLIC = "public", "공개"
         PRIVATE = "private", "비공개"

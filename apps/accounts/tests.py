@@ -1,10 +1,4 @@
-"""2단계(기반 공사) 회귀 테스트.
-
-명세 0장의 응답 공통 규칙과 도한님 피드백의 URI 원칙이 지켜지는지를 검증한다.
-3~6단계에서 무엇을 고치든 이 테스트가 깨지면 인증이 망가진 것이다.
-
-실행:  .venv/bin/python manage.py test
-"""
+"""인증 API 회귀 테스트. 실행: python ./manage.py test apps.accounts"""
 
 from django.urls import reverse
 from rest_framework import status
@@ -176,6 +170,14 @@ class TokenTests(APITestCase):
             "/api/v1/tokens/refresh", {"refresh_token": login["refresh_token"]}, format="json"
         )
         self.assertEqual(retry.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_refresh_token_없이_로그아웃하면_400이다(self):
+        login = self._login().data
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {login['access_token']}")
+
+        response = self.client.delete("/api/v1/tokens", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_로그인하지_않으면_로그아웃할_수_없다(self):
         response = self.client.delete("/api/v1/tokens", format="json")

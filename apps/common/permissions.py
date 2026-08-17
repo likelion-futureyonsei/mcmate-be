@@ -2,18 +2,12 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsOwner(BasePermission):
-    """소유자 본인만 접근 허용.
+    """소유자 본인만 허용. 판정은 ?owner= 가 아니라 토큰의 유저 ID (보안 원칙)."""
 
-    명세 보안 원칙: `?owner=` 쿼리는 조회 편의용일 뿐 신분증이 아니다.
-    권한 판정은 **항상 토큰에서 꺼낸 유저 ID**(request.user)로 한다.
-    """
-
-    owner_field = "owner_id"
     message = "본인의 리소스만 접근할 수 있습니다."
 
     def has_object_permission(self, request, view, obj):
-        field = getattr(view, "owner_field", self.owner_field)
-        return getattr(obj, field, None) == request.user.id
+        return getattr(obj, "owner_id", None) == request.user.id
 
 
 class IsOwnerOrReadOnlyIfPublic(IsOwner):
