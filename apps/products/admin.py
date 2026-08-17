@@ -14,10 +14,10 @@ class ProductAdmin(admin.ModelAdmin):
         ("기본", {"fields": ("name", "product_code", "image_url")}),
         ("외형", {"fields": ("line", "pattern", "color")}),
         (
-            "추억구슬",
+            "추억",
             {
                 "fields": ("capacity", "storybook"),
-                "description": "capacity 는 이 제품에 담을 수 있는 추억구슬 개수다. "
+                "description": "capacity 는 이 제품에 담을 수 있는 추억 개수다. "
                 "제안값 — 지갑 10 / 크로스백 20 / 백팩 30.",
             },
         ),

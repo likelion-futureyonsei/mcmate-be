@@ -57,8 +57,8 @@ class Memory(TimeStampedModel):
 
     class Meta:
         db_table = "memories"
-        verbose_name = "추억구슬"
-        verbose_name_plural = "추억구슬"
+        verbose_name = "추억"
+        verbose_name_plural = "추억"
         ordering = ["-created_at"]
         indexes = [
             models.Index(fields=["lat", "lng"], name="idx_memory_latlng"),
