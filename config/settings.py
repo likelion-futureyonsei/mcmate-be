@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'apps.accounts',    # 1·2장 사용자
     'apps.characters',  # 2장 캐릭터
     'apps.products',    # 3장 제품
-    'apps.memories',    # 4장 추억구슬
+    'apps.memories',    # 4장 추억
     'apps.storybooks',  # 5장 스토리북
 ]
 
