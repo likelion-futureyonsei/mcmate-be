@@ -19,8 +19,6 @@ from .serializers import (
 
 
 class UserCreateView(generics.CreateAPIView):
-    """POST /users — 회원가입 (Collection URI)."""
-
     queryset = User.objects.all()
     serializer_class = UserCreateSerializer
     permission_classes = [AllowAny]
@@ -38,8 +36,6 @@ class UserCreateView(generics.CreateAPIView):
 
 
 class UserDetailView(generics.RetrieveUpdateAPIView):
-    """GET·PATCH /users/:userID — 본인=전체, 타인=공개 정보만 (판정은 토큰 기준)."""
-
     queryset = User.objects.select_related("character")
     http_method_names = ["get", "patch", "head", "options"]
 
@@ -56,8 +52,6 @@ class UserDetailView(generics.RetrieveUpdateAPIView):
 
 
 class TokenView(APIView):
-    """POST /tokens 로그인 / DELETE /tokens 로그아웃 (토큰 무효화)."""
-
     def get_permissions(self):
         return [IsAuthenticated()] if self.request.method == "DELETE" else [AllowAny()]
 
@@ -82,8 +76,6 @@ class TokenView(APIView):
 
 
 class TokenRefreshView(APIView):
-    """POST /tokens/refresh — access_token 재발급 (Control Resource URI)."""
-
     permission_classes = [AllowAny]
 
     def post(self, request):

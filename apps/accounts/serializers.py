@@ -8,16 +8,12 @@ from .models import User
 
 
 class CharacterBriefSerializer(serializers.ModelSerializer):
-    """유저 조회에 싣는 캐릭터 요약 — 모델만 참조, 캐릭터 API 는 apps/characters."""
-
     class Meta:
         model = Character
-        fields = ["id", "doll_type", "pattern", "color", "equipped_product"]
+        fields = ["id", "doll", "pattern", "color", "equipped_product"]
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """POST /users — 회원가입."""
-
     password = serializers.CharField(
         write_only=True, validators=[validate_password], style={"input_type": "password"}
     )
@@ -54,8 +50,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 
 class UserSelfSerializer(serializers.ModelSerializer):
-    """본인 조회 — 자동 로그인 유지 및 설정 화면용."""
-
     character = CharacterBriefSerializer(read_only=True)
 
     class Meta:
@@ -79,8 +73,7 @@ class UserSelfSerializer(serializers.ModelSerializer):
 
 
 class UserPublicSerializer(serializers.ModelSerializer):
-    """타인 조회 — 장착 제품/캐릭터 뷰어용. 연락처·약관·알림 설정은 내려주지 않는다."""
-
+    # 타인에게는 뷰어에 필요한 것만 내려준다
     character = CharacterBriefSerializer(read_only=True)
 
     class Meta:
@@ -89,8 +82,6 @@ class UserPublicSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(TokenObtainPairSerializer):
-    """POST /tokens — 로그인. 토큰 2종 + user_id 반환 (명세 1장)."""
-
     username_field = User.USERNAME_FIELD
 
     default_error_messages = {
@@ -108,8 +99,6 @@ class LoginSerializer(TokenObtainPairSerializer):
 
 
 class RefreshSerializer(TokenRefreshSerializer):
-    """POST /tokens/refresh — 재발급. 필드명만 명세(refresh_token)에 맞춘다."""
-
     refresh = None  # 부모의 내부 필드명이 에러 메시지로 새지 않게 제거
 
     refresh_token = serializers.CharField(
