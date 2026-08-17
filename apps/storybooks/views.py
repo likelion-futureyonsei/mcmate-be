@@ -6,13 +6,6 @@ from .models import Storybook, Unlock
 
 
 class StorybookListView(APIView):
-    """GET /storybooks?owner={userID} — 스토리북 목록 (Collection URI).
-
-    명세 5장: **전체** 목록을 잠금 여부와 함께 준다 (미획득 포함).
-    도감·뱃지 화면에서 미획득 항목도 흐리게 표시해야 하기 때문.
-    응답 형태는 확정 대기 중인 은지님 형식(전체 + unlocked 플래그)을 따른다 (#8 참고).
-    """
-
     def get(self, request):
         owner_id = request.query_params.get("owner") or request.user.id
 
@@ -38,12 +31,6 @@ class StorybookListView(APIView):
 
 
 class StorybookDetailView(APIView):
-    """GET /storybooks/:storybookID — 스토리북 뷰어 (Element URI).
-
-    명세 5장 + 보안 합의: **잠긴 챕터는 제목만, body 는 null** 로 내려
-    미해금 콘텐츠가 노출되지 않게 한다. 잠금 판정은 요청자 본인의 해금 이력 기준.
-    """
-
     def get(self, request, pk):
         try:
             storybook = Storybook.objects.prefetch_related("chapters").get(pk=pk)
