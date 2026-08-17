@@ -11,18 +11,11 @@ from .serializers import ProductSerializer, UserProductCreateSerializer, UserPro
 
 
 class ProductListCreateView(generics.ListCreateAPIView):
-    """POST /products — 제품 등록 (Collection URI)
-    GET  /products?owner={userID} — 보유 제품 목록
-
-    시리얼 인식은 프론트가 OCR 처리 후 텍스트만 보낸다. 사진 첨부 없음 (명세 3장).
-    """
-
     def get_serializer_class(self):
         return UserProductCreateSerializer if self.request.method == "POST" else UserProductSerializer
 
     def get_queryset(self):
-        # 명세 3장: 보유 제품 목록은 "특정 유저(본인)" 용도다. 시리얼 번호가 포함되므로
-        # 타인 목록은 열어주지 않는다. 판정은 쿼리가 아니라 토큰의 유저 ID 로 한다.
+        # 시리얼이 포함되므로 본인 목록만 연다
         owner = self.request.query_params.get("owner") or self.request.user.id
         if str(owner) != str(self.request.user.id):
             raise PermissionDenied("보유 제품 목록은 본인만 조회할 수 있습니다.")
@@ -36,7 +29,7 @@ class ProductListCreateView(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # 시리얼 충돌은 형식 오류(400)가 아니라 도메인 충돌(409) — 사유를 구분해 명시한다.
+        # 시리얼 충돌은 409 로 구분한다
         existing = UserProduct.objects.filter(
             serial_no=serializer.validated_data["serial_no"]
         ).first()
@@ -54,13 +47,6 @@ class ProductListCreateView(generics.ListCreateAPIView):
 
 
 class RecommendView(APIView):
-    """GET /recommend — 제품 추천 (Control Resource)
-
-    ?character_id= : 캐릭터 외형(패턴·색) 기반 MCM 제품 추천
-    ?product_id=   : 특정 제품 용량 소진 시 다음 여정(제품) 추천
-                     (POST /memories 의 409 응답 links 가 이 주소를 가리킨다)
-    """
-
     LIMIT = 3
 
     def get(self, request):
@@ -76,7 +62,7 @@ class RecommendView(APIView):
         except (Character.DoesNotExist, ValueError):
             raise NotFound("캐릭터를 찾을 수 없습니다.")
 
-        # 패턴 일치를 색상 일치보다 우선한다 (외형 정체성이 패턴에 더 크게 걸림).
+        # 패턴 일치를 색상 일치보다 우선한다
         def score(product: Product) -> int:
             s = 0
             if product.pattern == character.pattern:
@@ -99,7 +85,7 @@ class RecommendView(APIView):
         base = current.product
         candidates = Product.objects.exclude(pk=base.pk)
 
-        # 다음 여정: 같은 라인의 상위 용량 > 더 큰 용량 > 그 외. 추천이 비는 일은 없게 한다.
+        # 같은 라인 상위 용량 > 더 큰 용량 > 그 외 순으로 추천이 비지 않게 한다
         same_line_up = [p for p in candidates if p.line == base.line and p.capacity >= base.capacity]
         bigger = [p for p in candidates if p.capacity > base.capacity]
         picks = same_line_up or bigger or list(candidates)

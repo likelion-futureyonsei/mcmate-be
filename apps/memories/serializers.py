@@ -6,8 +6,6 @@ from .models import Memory
 
 
 class MemorySerializer(serializers.ModelSerializer):
-    """추억 조회 응답. owner 는 "작성자 캐릭터 보기" 연결용 (명세 4장)."""
-
     class Meta:
         model = Memory
         fields = [
@@ -26,8 +24,6 @@ class MemorySerializer(serializers.ModelSerializer):
 
 
 class MemoryCreateSerializer(serializers.ModelSerializer):
-    """POST /memories 입력 (명세 8장 요청 예시와 필드명을 맞춘다)."""
-
     user_product_id = serializers.PrimaryKeyRelatedField(
         queryset=UserProduct.objects.all(),
         source="user_product",
@@ -46,7 +42,7 @@ class MemoryCreateSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # 본인 보유 제품에만 담을 수 있다 — 남의 제품 id 는 "없는 것"과 같게 취급한다
+        # 본인 보유 제품만 선택할 수 있다
         request = self.context.get("request")
         if request is not None:
             self.fields["user_product_id"].queryset = UserProduct.objects.filter(
