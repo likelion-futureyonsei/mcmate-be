@@ -37,7 +37,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # mcmate 앱. API 명세서 목차와 1:1로 대응한다.
+    'apps.common',      # 0장 응답 공통 규칙
+    'apps.accounts',    # 1·2장 사용자
+    'apps.characters',  # 2장 캐릭터
+    'apps.products',    # 3장 제품
+    'apps.memories',    # 4장 추억구슬
+    'apps.storybooks',  # 5장 스토리북
 ]
+
+# 이메일 로그인 커스텀 유저 (첫 migrate 이후 변경 불가 — 배경은 PR #1 참고)
+AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
