@@ -39,10 +39,11 @@ class UserProductSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "owner", "acquired_at"]
 
     def get_capacity(self, obj) -> dict:
-        return {"used": obj.capacity_used, "total": obj.capacity_total}
+        # len(all()) 은 prefetch 캐시를 타므로 목록에서 행마다 쿼리가 나가지 않는다
+        return {"used": len(obj.memories.all()), "total": obj.product.capacity}
 
     def get_memory_count(self, obj) -> int:
-        return obj.memories.count()
+        return len(obj.memories.all())
 
 
 class UserProductCreateSerializer(serializers.ModelSerializer):
