@@ -9,14 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 class DomainConflict(APIException):
-    """409 도메인 충돌. links 로 다음 행동 안내를 실을 수 있다 (명세 0장)."""
-
     status_code = status.HTTP_409_CONFLICT
     default_detail = "요청을 처리할 수 없는 상태입니다."
-
-    def __init__(self, detail=None, links=None):
-        super().__init__(detail)
-        self.links = links or []
 
 
 # 내부 진단용 키 — 사용자 메시지에서 제외
@@ -51,8 +45,5 @@ def api_exception_handler(exc, context):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-    payload = {"message": _flatten(response.data)}
-    if links := getattr(exc, "links", None):
-        payload["links"] = links
-    response.data = payload
+    response.data = {"message": _flatten(response.data)}
     return response
