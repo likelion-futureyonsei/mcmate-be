@@ -47,10 +47,7 @@ INSTALLED_APPS = [
     'apps.storybooks',  # 5장 스토리북
 ]
 
-# 명세 7장 users 테이블을 Django 인증의 기본 유저로 지정한다.
-# Django 기본 User 는 username 로그인이라 이메일 로그인 명세와 맞지 않고,
-# nickname/birth/phone/약관 동의/알림 설정을 담을 자리도 없다.
-# 이 설정은 첫 migrate 이후에는 사실상 변경이 불가능하다.
+# 이메일 로그인 커스텀 유저 (첫 migrate 이후 변경 불가 — 배경은 PR #1 참고)
 AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [

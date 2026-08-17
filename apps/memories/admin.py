@@ -5,11 +5,7 @@ from .models import Memory, Place
 
 @admin.register(Place)
 class PlaceAdmin(admin.ModelAdmin):
-    """특별 장소(포켓스탑) 시드 입력용.
-
-    `GET /places` 는 v0.5 에서 보류됐지만, 해금 판정이 이 표를 읽는다.
-    좌표와 radius 를 넣어두지 않으면 장소 스토리북이 영원히 안 열린다.
-    """
+    """특별 장소 시드 입력용 — 좌표·radius 가 없으면 장소 스토리북이 열리지 않는다."""
 
     list_display = ["id", "type", "name", "lat", "lng", "radius", "storybook"]
     list_filter = ["type"]

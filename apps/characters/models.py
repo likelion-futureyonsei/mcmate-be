@@ -4,11 +4,7 @@ from apps.common.models import TimeStampedModel
 
 
 class Character(TimeStampedModel):
-    """명세 7장 characters 테이블. 유저당 1개(1:1).
-
-    관련 API (POST /characters, PATCH /characters/:characterID,
-    GET /characters?owner={userID}) 는 이 앱 안에서 구현한다.
-    """
+    """명세 7장 characters — 유저당 1개(1:1)."""
 
     class Doll(models.TextChoices):
         BEARBRICK = "bearbrick", "베어브릭"

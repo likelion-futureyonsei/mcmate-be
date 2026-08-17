@@ -4,7 +4,7 @@ from .models import Chapter, Storybook, Unlock
 
 
 class ChapterInline(admin.TabularInline):
-    """스토리북 화면 안에서 챕터를 바로 쓸 수 있게 한다."""
+    """스토리북 화면에서 챕터를 함께 입력."""
 
     model = Chapter
     extra = 1

@@ -4,12 +4,7 @@ from apps.common.models import TimeStampedModel
 
 
 class Storybook(TimeStampedModel):
-    """명세 7장 storybooks 테이블. 시드 데이터.
-
-    scope 로 두 종류를 구분한다.
-      - product: 제품과 함께한 여정 (추억구슬 작성 수로 해금)
-      - place  : 특별 장소 스토리 (해당 좌표 반경 안에서 작성 시 해금)
-    """
+    """명세 7장 storybooks (시드). scope: product=작성 수 해금 / place=방문 해금."""
 
     class Scope(models.TextChoices):
         PRODUCT = "product", "제품"
@@ -29,11 +24,7 @@ class Storybook(TimeStampedModel):
 
 
 class Chapter(TimeStampedModel):
-    """명세 7장 chapters 테이블. 시드 데이터.
-
-    required_memories: 이 챕터가 열리는 데 필요한 추억구슬 수.
-    장소 스토리북의 첫 챕터처럼 방문만으로 열리는 경우는 0.
-    """
+    """명세 7장 chapters (시드). required_memories 개 이상 담으면 열린다."""
 
     storybook = models.ForeignKey(
         Storybook, on_delete=models.CASCADE, related_name="chapters", verbose_name="스토리북"
@@ -61,7 +52,7 @@ class Chapter(TimeStampedModel):
 
 
 class Unlock(models.Model):
-    """명세 7장 unlocks 테이블. 어떤 유저가 어떤 챕터를 언제 열었는지."""
+    """명세 7장 unlocks — 유저별 챕터 해금 이력."""
 
     user = models.ForeignKey(
         "accounts.User", on_delete=models.CASCADE, related_name="unlocks", verbose_name="유저"
