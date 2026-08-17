@@ -67,7 +67,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20,
     'ORDERING_PARAM': 'order',  # 명세: ?order=-key
     'EXCEPTION_HANDLER': 'apps.common.exceptions.api_exception_handler',
-    'UNAUTHENTICATED_USER': None,
 }
 
 SIMPLE_JWT = {

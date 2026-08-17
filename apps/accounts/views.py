@@ -4,7 +4,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.common.permissions import IsSelf
@@ -73,19 +72,12 @@ class TokenView(APIView):
 
     def delete(self, request):
         raw = request.data.get("refresh_token")
-
-        if raw:
-            # 이 기기 하나만 로그아웃
-            try:
-                RefreshToken(raw).blacklist()
-            except TokenError:
-                raise ValidationError("이미 만료되었거나 유효하지 않은 refresh_token 입니다.")
-        else:
-            # refresh_token 을 안 보냈으면 이 유저의 모든 기기를 로그아웃시킨다.
-            for token in OutstandingToken.objects.filter(user=request.user):
-                BlacklistedToken.objects.get_or_create(token=token)
-
-        # 명세 0장: 삭제 성공은 204 No Content
+        if not raw:
+            raise ValidationError("refresh_token 은 필수 항목입니다.")
+        try:
+            RefreshToken(raw).blacklist()
+        except TokenError:
+            raise ValidationError("이미 만료되었거나 유효하지 않은 refresh_token 입니다.")
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

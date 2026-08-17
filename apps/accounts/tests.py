@@ -171,6 +171,14 @@ class TokenTests(APITestCase):
         )
         self.assertEqual(retry.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_refresh_token_없이_로그아웃하면_400이다(self):
+        login = self._login().data
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {login['access_token']}")
+
+        response = self.client.delete("/api/v1/tokens", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_로그인하지_않으면_로그아웃할_수_없다(self):
         response = self.client.delete("/api/v1/tokens", format="json")
 
