@@ -24,7 +24,7 @@ jobs:
           sshpass -p "$PASSWORD" ssh -o StrictHostKeyChecking=no -p "$PORT" "$USERNAME@$HOST" << 'EOF'
             cd /root/data/backend && git pull origin master
             if [ $? -eq 0 ]; then
-              cd /root && docker compose restart backend
+              cd /root && docker compose up -d --build backend
             else
               echo "Git pull failed, skipping docker restart"
               exit 0
