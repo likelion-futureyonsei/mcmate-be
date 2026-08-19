@@ -149,6 +149,16 @@ class GenerateTests(GenerateTestBase):
         self.assertIn("낯선 길이 익숙해질 때까지", prompt)
         self.assertIn("여정", prompt)
 
+    @mock.patch("apps.storybooks.services.call_llm", return_value="이야기")
+    def test_프롬프트에_브랜드_정보가_들어간다(self, mocked):
+        self.add_memory()
+
+        self.generate()
+
+        prompt = mocked.call_args[0][0]
+        self.assertIn("반지갑", prompt)
+        self.assertIn("visetos", prompt)
+
     def test_관련_추억이_없으면_409다(self):
         response = self.generate()
 
