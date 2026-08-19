@@ -23,5 +23,6 @@ API_PREFIX = 'api/v1/'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(API_PREFIX, include('apps.accounts.urls')),
+    path(API_PREFIX, include('apps.characters.urls')),
     path(API_PREFIX, include('apps.products.urls')),
 ]
