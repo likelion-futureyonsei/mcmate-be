@@ -1,8 +1,9 @@
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Storybook, Unlock
+from .models import GeneratedStory, Storybook, Unlock
+from .services import generate_story
 
 
 class StorybookListView(APIView):
@@ -41,6 +42,7 @@ class StorybookDetailView(APIView):
             Unlock.objects.filter(user=request.user, chapter__storybook=storybook)
             .values_list("chapter_id", flat=True)
         )
+        story = GeneratedStory.objects.filter(user=request.user, storybook=storybook).first()
 
         return Response(
             {
@@ -48,6 +50,7 @@ class StorybookDetailView(APIView):
                 "scope": storybook.scope,
                 "title": storybook.title,
                 "cover_url": storybook.cover_url,
+                "my_story": story.body if story else None,
                 "chapters": [
                     {
                         "id": chapter.id,
@@ -61,3 +64,17 @@ class StorybookDetailView(APIView):
                 ],
             }
         )
+
+
+class GenerateView(APIView):
+    def post(self, request):
+        storybook_id = request.data.get("storybook_id")
+        if not storybook_id:
+            raise ValidationError("storybook_id 는 필수 항목입니다.")
+        try:
+            storybook = Storybook.objects.get(pk=storybook_id)
+        except (Storybook.DoesNotExist, ValueError):
+            raise NotFound("스토리북을 찾을 수 없습니다.")
+
+        story = generate_story(request.user, storybook)
+        return Response({"storybook_id": storybook.id, "body": story.body})
