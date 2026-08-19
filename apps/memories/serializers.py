@@ -48,3 +48,13 @@ class MemoryCreateSerializer(serializers.ModelSerializer):
             self.fields["user_product_id"].queryset = UserProduct.objects.filter(
                 owner=request.user
             )
+
+
+class MemoryUpdateSerializer(serializers.ModelSerializer):
+    photo_key = serializers.CharField(
+        source="photo", required=False, allow_blank=True, max_length=255
+    )
+
+    class Meta:
+        model = Memory
+        fields = ["photo_key", "place_name", "note", "visibility"]

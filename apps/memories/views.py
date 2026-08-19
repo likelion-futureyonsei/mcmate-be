@@ -12,7 +12,7 @@ from apps.common.exceptions import DomainConflict
 from apps.common.permissions import IsOwnerOrReadOnlyIfPublic
 
 from .models import Memory
-from .serializers import MemoryCreateSerializer, MemorySerializer
+from .serializers import MemoryCreateSerializer, MemorySerializer, MemoryUpdateSerializer
 from .services import distance_m, process_unlocks
 
 
@@ -92,7 +92,16 @@ class MemoryListCreateView(generics.ListCreateAPIView):
         )
 
 
-class MemoryDetailView(generics.RetrieveAPIView):
+class MemoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Memory.objects.select_related("user_product")
-    serializer_class = MemorySerializer
     permission_classes = [IsOwnerOrReadOnlyIfPublic]
+    http_method_names = ["get", "patch", "delete", "head", "options"]
+
+    def get_serializer_class(self):
+        return MemoryUpdateSerializer if self.request.method == "PATCH" else MemorySerializer
+
+    def update(self, request, *args, **kwargs):
+        kwargs["partial"] = True  # PUT 없이 항상 부분 수정
+        super().update(request, *args, **kwargs)
+        # 수정 응답도 조회와 같은 전체 형태로 돌려준다
+        return Response(MemorySerializer(self.get_object()).data)

@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 
 from apps.characters.models import Character
 from apps.common.exceptions import DomainConflict
+from apps.common.permissions import IsOwner
 
 from .models import Product, UserProduct
 from .serializers import ProductSerializer, UserProductCreateSerializer, UserProductSerializer
@@ -44,6 +45,12 @@ class ProductListCreateView(generics.ListCreateAPIView):
             status=status.HTTP_201_CREATED,
             headers={"Location": f"/api/v1/products/{user_product.id}"},
         )
+
+
+class UserProductDetailView(generics.RetrieveAPIView):
+    queryset = UserProduct.objects.select_related("product__storybook")
+    serializer_class = UserProductSerializer
+    permission_classes = [IsOwner]
 
 
 class RecommendView(APIView):
