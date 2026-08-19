@@ -3,12 +3,18 @@
 실행:  python ./manage.py test apps.storybooks
 """
 
+import os
+from decimal import Decimal
+from unittest import mock
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from apps.accounts.models import User
+from apps.memories.models import Memory
+from apps.products.models import Product, UserProduct
 
-from .models import Chapter, Storybook, Unlock
+from .models import Chapter, GeneratedStory, Storybook, Unlock
 
 PASSWORD = "Mcm!Memory2026"
 
@@ -82,3 +88,106 @@ class StorybookViewerTests(StorybookTestBase):
         response = self.client.get("/api/v1/storybooks/999999")
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class GenerateTestBase(APITestCase):
+    def setUp(self):
+        self.me = User.objects.create_user(
+            email="me@mcmate.dev", password=PASSWORD, nickname="나", agree_data=True
+        )
+        self.sb = Storybook.objects.create(scope="product", title="여정")
+        Chapter.objects.create(storybook=self.sb, chapter_no=1, title="시작", required_memories=1)
+        product = Product.objects.create(
+            name="반지갑", line="비세토스", pattern="visetos", color="cognac",
+            product_code="T-G-001", capacity=10, storybook=self.sb,
+        )
+        self.mine = UserProduct.objects.create(owner=self.me, product=product, serial_no="SN-G-01")
+        self.client.force_authenticate(self.me)
+
+    def add_memory(self, note="성수에서"):
+        return Memory.objects.create(
+            owner=self.me, user_product=self.mine,
+            lat=Decimal("37.5446"), lng=Decimal("127.0559"), place_name="성수동", note=note,
+        )
+
+    def generate(self, **payload):
+        return self.client.post("/api/v1/generate", {"storybook_id": self.sb.id, **payload}, format="json")
+
+
+@mock.patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"})
+class GenerateTests(GenerateTestBase):
+    """POST /generate — AI 스토리 생성 (이슈 #17)"""
+
+    @mock.patch("apps.storybooks.services.call_llm", return_value="생성된 이야기")
+    def test_생성하면_본문을_돌려주고_저장된다(self, mocked):
+        self.add_memory()
+
+        response = self.generate()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["body"], "생성된 이야기")
+        self.assertEqual(GeneratedStory.objects.filter(user=self.me, storybook=self.sb).count(), 1)
+
+    @mock.patch("apps.storybooks.services.call_llm", return_value="새 이야기")
+    def test_재생성하면_덮어쓴다(self, mocked):
+        self.add_memory()
+        GeneratedStory.objects.create(user=self.me, storybook=self.sb, body="옛 이야기")
+
+        response = self.generate()
+
+        story = GeneratedStory.objects.get(user=self.me, storybook=self.sb)
+        self.assertEqual(story.body, "새 이야기")
+        self.assertEqual(GeneratedStory.objects.count(), 1)
+
+    @mock.patch("apps.storybooks.services.call_llm", return_value="이야기")
+    def test_프롬프트에_유저_기록이_들어간다(self, mocked):
+        self.add_memory(note="낯선 길이 익숙해질 때까지")
+
+        self.generate()
+
+        prompt = mocked.call_args[0][0]
+        self.assertIn("낯선 길이 익숙해질 때까지", prompt)
+        self.assertIn("여정", prompt)
+
+    def test_관련_추억이_없으면_409다(self):
+        response = self.generate()
+
+        self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+        self.assertIn("추억", response.data["message"])
+
+    def test_storybook_id_누락은_400이다(self):
+        response = self.client.post("/api/v1/generate", {}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_없는_스토리북은_404다(self):
+        response = self.client.post("/api/v1/generate", {"storybook_id": 999999}, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    @mock.patch("apps.storybooks.services.call_llm", return_value="이야기")
+    def test_생성_후_뷰어에_my_story가_보인다(self, mocked):
+        self.add_memory()
+        self.generate()
+
+        response = self.client.get(f"/api/v1/storybooks/{self.sb.id}")
+
+        self.assertEqual(response.data["my_story"], "이야기")
+
+    def test_토큰_없이는_생성할_수_없다(self):
+        self.client.force_authenticate(None)
+
+        response = self.generate()
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class GenerateWithoutKeyTests(GenerateTestBase):
+    def test_키가_없으면_503이다(self):
+        self.add_memory()
+        env = {k: v for k, v in os.environ.items() if k != "OPENAI_API_KEY"}
+
+        with mock.patch.dict(os.environ, env, clear=True):
+            response = self.generate()
+
+        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)

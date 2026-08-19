@@ -67,3 +67,26 @@ class Unlock(models.Model):
 
     def __str__(self):
         return f"{self.user.nickname} -> {self.chapter}"
+
+
+class GeneratedStory(TimeStampedModel):
+    user = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="generated_stories", verbose_name="유저"
+    )
+    storybook = models.ForeignKey(
+        Storybook, on_delete=models.CASCADE, related_name="generated_stories", verbose_name="스토리북"
+    )
+    body = models.TextField("본문")
+
+    class Meta:
+        db_table = "generated_stories"
+        verbose_name = "생성 스토리"
+        verbose_name_plural = "생성 스토리"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "storybook"], name="uniq_generated_story_per_user_storybook"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user.nickname} - {self.storybook.title}"
