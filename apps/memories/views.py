@@ -1,6 +1,7 @@
 import uuid
 
 from django.core.files.storage import default_storage
+from django.db.models import Q
 from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -8,9 +9,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.common.exceptions import DomainConflict
+from apps.common.permissions import IsOwnerOrReadOnlyIfPublic
 
+from .models import Memory
 from .serializers import MemoryCreateSerializer, MemorySerializer
-from .services import process_unlocks
+from .services import distance_m, process_unlocks
 
 
 class UploadView(APIView):
@@ -34,8 +37,32 @@ class UploadView(APIView):
         )
 
 
-class MemoryCreateView(generics.CreateAPIView):
-    serializer_class = MemoryCreateSerializer
+class MemoryListCreateView(generics.ListCreateAPIView):
+    def get_serializer_class(self):
+        return MemoryCreateSerializer if self.request.method == "POST" else MemorySerializer
+
+    def get_queryset(self):
+        # 기본 노출 범위: 모두의 공개 추억 + 나의 비공개 추억
+        qs = (
+            Memory.objects.select_related("user_product")
+            .filter(Q(visibility=Memory.Visibility.PUBLIC) | Q(owner=self.request.user))
+        )
+
+        params = self.request.query_params
+        if owner := params.get("owner"):
+            qs = qs.filter(owner_id=owner)
+        if product_id := params.get("product_id"):
+            qs = qs.filter(user_product_id=product_id)
+
+        lat, lng, radius = params.get("lat"), params.get("lng"), params.get("radius")
+        if lat and lng and radius:
+            try:
+                lat, lng, radius = float(lat), float(lng), float(radius)
+            except ValueError:
+                raise ValidationError("lat, lng, radius 는 숫자여야 합니다.")
+            # 시연 규모(수백 건)에서는 정밀 거리 계산을 파이썬에서 해도 충분하다.
+            return [m for m in qs if distance_m(m.lat, m.lng, lat, lng) <= radius]
+        return qs
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -63,3 +90,9 @@ class MemoryCreateView(generics.CreateAPIView):
             status=status.HTTP_201_CREATED,
             headers={"Location": f"/api/v1/memories/{memory.id}"},
         )
+
+
+class MemoryDetailView(generics.RetrieveAPIView):
+    queryset = Memory.objects.select_related("user_product")
+    serializer_class = MemorySerializer
+    permission_classes = [IsOwnerOrReadOnlyIfPublic]
