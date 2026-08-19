@@ -37,3 +37,4 @@ class CharacterDetailView(generics.RetrieveUpdateAPIView):
     serializer_class = CharacterSerializer
     permission_classes = [IsOwner]
     http_method_names = ["get", "patch", "head", "options"]
+    
