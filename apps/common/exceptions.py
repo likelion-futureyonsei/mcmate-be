@@ -8,6 +8,11 @@ from rest_framework.views import exception_handler as drf_exception_handler
 logger = logging.getLogger(__name__)
 
 
+class ServiceUnavailable(APIException):
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    default_detail = "일시적으로 사용할 수 없는 기능입니다."
+
+
 class DomainConflict(APIException):
     status_code = status.HTTP_409_CONFLICT
     default_detail = "요청을 처리할 수 없는 상태입니다."

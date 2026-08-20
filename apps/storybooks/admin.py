@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Chapter, Storybook, Unlock
+from .models import Chapter, GeneratedStory, Storybook, Unlock
 
 
 class ChapterInline(admin.TabularInline):
@@ -36,3 +36,9 @@ class UnlockAdmin(admin.ModelAdmin):
     search_fields = ["user__nickname", "user__email", "chapter__title"]
     autocomplete_fields = ["user", "chapter"]
     readonly_fields = ["unlocked_at"]
+
+
+@admin.register(GeneratedStory)
+class GeneratedStoryAdmin(admin.ModelAdmin):
+    list_display = ["id", "user", "storybook", "updated_at"]
+    search_fields = ["user__nickname", "storybook__title"]
