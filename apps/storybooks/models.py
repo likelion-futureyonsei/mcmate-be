@@ -73,8 +73,8 @@ class GeneratedStory(TimeStampedModel):
     user = models.ForeignKey(
         "accounts.User", on_delete=models.CASCADE, related_name="generated_stories", verbose_name="유저"
     )
-    storybook = models.ForeignKey(
-        Storybook, on_delete=models.CASCADE, related_name="generated_stories", verbose_name="스토리북"
+    chapter = models.ForeignKey(
+        Chapter, on_delete=models.CASCADE, related_name="generated_stories", verbose_name="챕터"
     )
     body = models.TextField("본문")
 
@@ -84,9 +84,9 @@ class GeneratedStory(TimeStampedModel):
         verbose_name_plural = "생성 스토리"
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "storybook"], name="uniq_generated_story_per_user_storybook"
+                fields=["user", "chapter"], name="uniq_generated_story_per_user_chapter"
             )
         ]
 
     def __str__(self):
-        return f"{self.user.nickname} - {self.storybook.title}"
+        return f"{self.user.nickname} - {self.chapter}"

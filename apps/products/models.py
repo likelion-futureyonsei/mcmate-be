@@ -15,6 +15,7 @@ class Product(TimeStampedModel):
     warranty_months = models.PositiveIntegerField("보증 기간(개월)", default=24)
     care_guide = models.TextField("보관법", blank=True)
     image_url = models.URLField("이미지 URL", blank=True)
+    store_url = models.URLField("스토어 링크", blank=True)
     storybook = models.ForeignKey(
         "storybooks.Storybook",
         on_delete=models.SET_NULL,

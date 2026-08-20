@@ -40,5 +40,5 @@ class UnlockAdmin(admin.ModelAdmin):
 
 @admin.register(GeneratedStory)
 class GeneratedStoryAdmin(admin.ModelAdmin):
-    list_display = ["id", "user", "storybook", "updated_at"]
-    search_fields = ["user__nickname", "storybook__title"]
+    list_display = ["id", "user", "chapter", "updated_at"]
+    search_fields = ["user__nickname", "chapter__title"]

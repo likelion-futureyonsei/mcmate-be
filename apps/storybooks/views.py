@@ -2,8 +2,10 @@ from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import GeneratedStory, Storybook, Unlock
-from .services import generate_story
+from apps.common.exceptions import DomainConflict
+
+from .models import Chapter, GeneratedStory, Storybook, Unlock
+from .services import generate_chapter_story
 
 
 class StorybookListView(APIView):
@@ -42,7 +44,11 @@ class StorybookDetailView(APIView):
             Unlock.objects.filter(user=request.user, chapter__storybook=storybook)
             .values_list("chapter_id", flat=True)
         )
-        story = GeneratedStory.objects.filter(user=request.user, storybook=storybook).first()
+        # 권별 내 생성 스토리. 없으면 시드 본문이 폴백이다
+        stories = dict(
+            GeneratedStory.objects.filter(user=request.user, chapter__storybook=storybook)
+            .values_list("chapter_id", "body")
+        )
 
         return Response(
             {
@@ -50,7 +56,6 @@ class StorybookDetailView(APIView):
                 "scope": storybook.scope,
                 "title": storybook.title,
                 "cover_url": storybook.cover_url,
-                "my_story": story.body if story else None,
                 "chapters": [
                     {
                         "id": chapter.id,
@@ -58,7 +63,11 @@ class StorybookDetailView(APIView):
                         "title": chapter.title,
                         "required_memories": chapter.required_memories,
                         "unlocked": chapter.id in opened,
-                        "body": chapter.body if chapter.id in opened else None,
+                        "story": (
+                            stories.get(chapter.id) or chapter.body or None
+                            if chapter.id in opened
+                            else None
+                        ),
                     }
                     for chapter in storybook.chapters.all()
                 ],
@@ -68,13 +77,23 @@ class StorybookDetailView(APIView):
 
 class GenerateView(APIView):
     def post(self, request):
-        storybook_id = request.data.get("storybook_id")
-        if not storybook_id:
-            raise ValidationError("storybook_id 는 필수 항목입니다.")
+        chapter_id = request.data.get("chapter_id")
+        if not chapter_id:
+            raise ValidationError("chapter_id 는 필수 항목입니다.")
         try:
-            storybook = Storybook.objects.get(pk=storybook_id)
-        except (Storybook.DoesNotExist, ValueError):
-            raise NotFound("스토리북을 찾을 수 없습니다.")
+            chapter = Chapter.objects.select_related("storybook").get(pk=chapter_id)
+        except (Chapter.DoesNotExist, ValueError):
+            raise NotFound("챕터를 찾을 수 없습니다.")
+        if not Unlock.objects.filter(user=request.user, chapter=chapter).exists():
+            raise DomainConflict("아직 잠긴 챕터입니다. 추억을 담아 해금해 주세요.")
 
-        story = generate_story(request.user, storybook)
-        return Response({"storybook_id": storybook.id, "body": story.body})
+        story = generate_chapter_story(request.user, chapter)
+        return Response(
+            {
+                "storybook_id": chapter.storybook_id,
+                "chapter_id": chapter.id,
+                "chapter_no": chapter.chapter_no,
+                "title": chapter.title,
+                "body": story.body,
+            }
+        )

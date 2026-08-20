@@ -20,6 +20,7 @@ def _unlock(user, chapter, reason: str, unlocked: list) -> None:
         unlocked.append(
             {
                 "storybook_id": chapter.storybook_id,
+                "chapter_id": chapter.id,
                 "chapter_no": chapter.chapter_no,
                 "reason": reason,
             }
@@ -52,10 +53,3 @@ def process_unlocks(memory: Memory) -> list[dict]:
 
     return unlocked
 
-
-def matched_place_storybooks(memory):
-    return [
-        place.storybook
-        for place in Place.objects.select_related("storybook")
-        if distance_m(memory.lat, memory.lng, place.lat, place.lng) <= place.radius
-    ]

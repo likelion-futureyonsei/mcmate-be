@@ -125,10 +125,16 @@ class UnlockTests(MemoryTestBase):
     def test_첫_작성으로_제품_챕터1이_열린다(self):
         response = self.write_memory(**FAR_AWAY)  # 장소 해금과 분리해 제품 해금만 본다
 
+        ch1 = Chapter.objects.get(storybook=self.product_sb, chapter_no=1)
         unlocked = response.data["unlocked"]
         self.assertEqual(
             unlocked,
-            [{"storybook_id": self.product_sb.id, "chapter_no": 1, "reason": "memory_count"}],
+            [{
+                "storybook_id": self.product_sb.id,
+                "chapter_id": ch1.id,
+                "chapter_no": 1,
+                "reason": "memory_count",
+            }],
         )
         self.assertTrue(
             Unlock.objects.filter(user=self.me, chapter__chapter_no=1).exists()
@@ -329,29 +335,39 @@ class MemoryModifyTests(MemoryTestBase):
 
 @mock.patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"})
 class AutoStoryTests(MemoryTestBase):
-    """장소 매칭 시 AI 스토리 자동 생성"""
+    """해금된 권(챕터)마다 AI 스토리 자동 생성"""
 
     @mock.patch("apps.storybooks.services.call_llm", return_value="자동 이야기")
-    def test_장소_반경_안에서_작성하면_스토리가_자동_생성된다(self, mocked):
-        response = self.write_memory()  # 성수 좌표
+    def test_장소_반경_안에서_작성하면_장소_권_스토리가_생성된다(self, mocked):
+        response = self.write_memory()  # 성수 좌표 — 제품 1권 + 장소 1권 해금
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        story = GeneratedStory.objects.get(user=self.me, storybook=self.place_sb)
-        self.assertEqual(story.body, "자동 이야기")
+        place_stories = GeneratedStory.objects.filter(
+            user=self.me, chapter__storybook=self.place_sb
+        )
+        self.assertEqual(place_stories.count(), 1)
+        self.assertEqual(place_stories.first().body, "자동 이야기")
 
     @mock.patch("apps.storybooks.services.call_llm", return_value="자동 이야기")
-    def test_이미_생성된_스토리는_다시_만들지_않는다(self, mocked):
+    def test_같은_권은_다시_생성하지_않는다(self, mocked):
         self.write_memory()
-        self.write_memory()
+        self.write_memory()  # 장소 1권은 이미 생성됨, 제품 2권만 새로
 
-        self.assertEqual(mocked.call_count, 1)
-        self.assertEqual(GeneratedStory.objects.count(), 1)
+        self.assertEqual(
+            GeneratedStory.objects.filter(user=self.me, chapter__storybook=self.place_sb).count(),
+            1,
+        )
 
     @mock.patch("apps.storybooks.services.call_llm", return_value="자동 이야기")
-    def test_반경_밖에서는_자동_생성되지_않는다(self, mocked):
-        self.write_memory(**FAR_AWAY)
+    def test_반경_밖에서는_장소_스토리가_생성되지_않는다(self, mocked):
+        self.write_memory(**FAR_AWAY)  # 제품 1권만 해금
 
-        self.assertEqual(mocked.call_count, 0)
+        self.assertFalse(
+            GeneratedStory.objects.filter(chapter__storybook=self.place_sb).exists()
+        )
+        self.assertTrue(
+            GeneratedStory.objects.filter(chapter__storybook=self.product_sb).exists()
+        )
 
     def test_키가_없어도_추억_저장은_성공한다(self):
         env = {k: v for k, v in os.environ.items() if k != "OPENAI_API_KEY"}
