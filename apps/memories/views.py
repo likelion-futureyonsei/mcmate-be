@@ -12,12 +12,12 @@ from rest_framework.views import APIView
 from apps.common.exceptions import DomainConflict
 from apps.common.permissions import IsOwnerOrReadOnlyIfPublic
 
-from apps.storybooks.models import GeneratedStory
-from apps.storybooks.services import generate_story
+from apps.storybooks.models import Chapter, GeneratedStory
+from apps.storybooks.services import generate_chapter_story
 
 from .models import Memory
 from .serializers import MemoryCreateSerializer, MemorySerializer, MemoryUpdateSerializer
-from .services import distance_m, matched_place_storybooks, process_unlocks
+from .services import distance_m, process_unlocks
 
 
 class UploadView(APIView):
@@ -82,15 +82,18 @@ class MemoryListCreateView(generics.ListCreateAPIView):
         # 해금 판정
         unlocked = process_unlocks(memory)
 
-        # 장소 매칭 시 AI 스토리 자동 생성 (기획 결정). 실패해도 추억 저장은 성공한다
-        for storybook in matched_place_storybooks(memory):
-            if GeneratedStory.objects.filter(user=request.user, storybook=storybook).exists():
+        # 해금된 권(챕터)마다 AI 스토리 자동 생성. 실패해도 추억 저장은 성공한다
+        for entry in unlocked:
+            if GeneratedStory.objects.filter(
+                user=request.user, chapter_id=entry["chapter_id"]
+            ).exists():
                 continue
             try:
-                generate_story(request.user, storybook)
+                chapter = Chapter.objects.select_related("storybook").get(pk=entry["chapter_id"])
+                generate_chapter_story(request.user, chapter)
             except Exception as exc:
                 logging.getLogger(__name__).warning(
-                    "AI 스토리 자동 생성 실패 (storybook=%s): %s", storybook.id, exc
+                    "AI 스토리 자동 생성 실패 (chapter=%s): %s", entry["chapter_id"], exc
                 )
 
         # 응답 구성
