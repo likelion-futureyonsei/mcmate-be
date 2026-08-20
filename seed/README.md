@@ -26,7 +26,7 @@ python ./manage.py loaddata seed/01_storybooks.json seed/02_products.json seed/0
 | --- | --- | --- |
 | 제품 용량 | 시안 게이지 기준 50/50/100/30/50/50 | `02` 의 `capacity` |
 | 장소 인식 반경 | 200m | `03` 의 `radius` |
-| 챕터 해금 조건 | 0/3/5/10 (제품), 0/2 (장소) | `01` 의 `required_memories` |
+| 챕터 해금 조건 | 1/15/30 (제품, 15개 단위), 1/5 (장소) | `01` 의 `required_memories` |
 | 챕터 본문 | `[본문 placeholder]` | `01` 의 `body` — LLM 생성 후 교체 |
 
 ## 매칭 규칙 (GET /recommend 가 쓴다)
