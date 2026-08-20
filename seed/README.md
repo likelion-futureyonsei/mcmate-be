@@ -15,7 +15,7 @@ python ./manage.py loaddata seed/01_storybooks.json seed/02_products.json seed/0
 | 파일 | 내용 |
 | --- | --- |
 | `01_storybooks.json` | 스토리북 4권 (제품 2 + 장소 2), 챕터 11개 |
-| `02_products.json` | 제품 마스터 6개 — 지갑 2 / 크로스·토트 3 / 백팩 1 |
+| `02_products.json` | 제품 마스터 6개 — 하이파이 시안 "나의 제품" 화면과 1:1 (id 1~6) |
 | `03_places.json` | 특별 장소 2곳 — 성수(명세 8장 예시 좌표), 명동 |
 
 ## ⚠️ 회의(#11)에서 확정되면 고칠 값
@@ -24,7 +24,7 @@ python ./manage.py loaddata seed/01_storybooks.json seed/02_products.json seed/0
 
 | 항목 | 현재 값 | 위치 |
 | --- | --- | --- |
-| 제품 용량 | 지갑 10 / 크로스 20 / 백팩 30 | `02` 의 `capacity` |
+| 제품 용량 | 시안 게이지 기준 50/50/100/30/50/50 | `02` 의 `capacity` |
 | 장소 인식 반경 | 200m | `03` 의 `radius` |
 | 챕터 해금 조건 | 0/3/5/10 (제품), 0/2 (장소) | `01` 의 `required_memories` |
 | 챕터 본문 | `[본문 placeholder]` | `01` 의 `body` — LLM 생성 후 교체 |
