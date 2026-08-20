@@ -51,3 +51,11 @@ def process_unlocks(memory: Memory) -> list[dict]:
             _unlock(user, chapter, "place_visit", unlocked)
 
     return unlocked
+
+
+def matched_place_storybooks(memory):
+    return [
+        place.storybook
+        for place in Place.objects.select_related("storybook")
+        if distance_m(memory.lat, memory.lng, place.lat, place.lng) <= place.radius
+    ]

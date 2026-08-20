@@ -3,8 +3,10 @@
 실행:  python ./manage.py test apps.memories
 """
 
+import os
 import tempfile
 from decimal import Decimal
+from unittest import mock
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
@@ -13,7 +15,7 @@ from rest_framework.test import APITestCase
 
 from apps.accounts.models import User
 from apps.products.models import Product, UserProduct
-from apps.storybooks.models import Chapter, Storybook, Unlock
+from apps.storybooks.models import Chapter, GeneratedStory, Storybook, Unlock
 
 from .models import Memory, Place
 
@@ -323,3 +325,46 @@ class MemoryModifyTests(MemoryTestBase):
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue(Memory.objects.filter(pk=self.memory.pk).exists())
+
+
+@mock.patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"})
+class AutoStoryTests(MemoryTestBase):
+    """장소 매칭 시 AI 스토리 자동 생성"""
+
+    @mock.patch("apps.storybooks.services.call_llm", return_value="자동 이야기")
+    def test_장소_반경_안에서_작성하면_스토리가_자동_생성된다(self, mocked):
+        response = self.write_memory()  # 성수 좌표
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        story = GeneratedStory.objects.get(user=self.me, storybook=self.place_sb)
+        self.assertEqual(story.body, "자동 이야기")
+
+    @mock.patch("apps.storybooks.services.call_llm", return_value="자동 이야기")
+    def test_이미_생성된_스토리는_다시_만들지_않는다(self, mocked):
+        self.write_memory()
+        self.write_memory()
+
+        self.assertEqual(mocked.call_count, 1)
+        self.assertEqual(GeneratedStory.objects.count(), 1)
+
+    @mock.patch("apps.storybooks.services.call_llm", return_value="자동 이야기")
+    def test_반경_밖에서는_자동_생성되지_않는다(self, mocked):
+        self.write_memory(**FAR_AWAY)
+
+        self.assertEqual(mocked.call_count, 0)
+
+    def test_키가_없어도_추억_저장은_성공한다(self):
+        env = {k: v for k, v in os.environ.items() if k != "OPENAI_API_KEY"}
+
+        with mock.patch.dict(os.environ, env, clear=True):
+            response = self.write_memory()
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertFalse(GeneratedStory.objects.exists())
+
+    @mock.patch("apps.storybooks.services.call_llm", side_effect=RuntimeError("OpenAI 죽음"))
+    def test_AI가_실패해도_추억_저장은_성공한다(self, mocked):
+        response = self.write_memory()
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertFalse(GeneratedStory.objects.exists())
