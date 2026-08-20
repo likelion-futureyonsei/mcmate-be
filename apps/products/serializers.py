@@ -17,6 +17,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "warranty_months",
             "care_guide",
             "image_url",
+            "store_url",
             "storybook",
         ]
 
