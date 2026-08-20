@@ -1,0 +1,116 @@
+[
+  {
+    "model": "products.product",
+    "pk": 1,
+    "fields": {
+      "name": "Stark 사이드 스터드 비세토스 백팩",
+      "line": "Stark",
+      "pattern": "visetos",
+      "color": "cognac",
+      "product_code": "MCM-B-001",
+      "capacity": 50,
+      "warranty_months": 24,
+      "care_guide": "스터드 장식이 다른 가죽 제품에 닿지 않게 보관하세요.",
+      "image_url": "",
+      "storybook": 1,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z",
+      "store_url": "https://kr.mcmworldwide.com/ko_KR/search?q=stark%20backpack"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 2,
+    "fields": {
+      "name": "비세토스 프루스튼 벨트백",
+      "line": "프루스튼",
+      "pattern": "visetos",
+      "color": "black",
+      "product_code": "MCM-C-001",
+      "capacity": 50,
+      "warranty_months": 24,
+      "care_guide": "스트랩 연결부를 주기적으로 점검하세요.",
+      "image_url": "",
+      "storybook": 1,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z",
+      "store_url": "https://kr.mcmworldwide.com/ko_KR/search?q=belt%20bag"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 3,
+    "fields": {
+      "name": "Ottomar 비세토스 위켄더",
+      "line": "Ottomar",
+      "pattern": "visetos",
+      "color": "cognac",
+      "product_code": "MCM-T-001",
+      "capacity": 100,
+      "warranty_months": 24,
+      "care_guide": "장시간 압박 보관 시 형태가 변형될 수 있습니다.",
+      "image_url": "",
+      "storybook": 1,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z",
+      "store_url": "https://kr.mcmworldwide.com/ko_KR/search?q=ottomar%20weekender"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 4,
+    "fields": {
+      "name": "MCM X CASETiFY 모노그램 iPhone 17 Pro Max 케이스",
+      "line": "MCM X CASETiFY",
+      "pattern": "cubic_monogram",
+      "color": "pink",
+      "product_code": "MCM-A-001",
+      "capacity": 30,
+      "warranty_months": 12,
+      "care_guide": "고온 환경에 장시간 두지 마세요.",
+      "image_url": "",
+      "storybook": 2,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z",
+      "store_url": "https://kr.mcmworldwide.com/ko_KR/search?q=casetify"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 5,
+    "fields": {
+      "name": "Skywander 비세토스 로우탑 스니커즈",
+      "line": "Skywander",
+      "pattern": "visetos",
+      "color": "cognac",
+      "product_code": "MCM-S-001",
+      "capacity": 50,
+      "warranty_months": 12,
+      "care_guide": "부드러운 브러시로 표면 먼지를 제거하세요.",
+      "image_url": "",
+      "storybook": 1,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z",
+      "store_url": "https://kr.mcmworldwide.com/ko_KR/search?q=skywander"
+    }
+  },
+  {
+    "model": "products.product",
+    "pk": 6,
+    "fields": {
+      "name": "블랙 퀼팅 토트백",
+      "line": "퀼팅",
+      "pattern": "lauretos",
+      "color": "black",
+      "product_code": "MCM-T-002",
+      "capacity": 50,
+      "warranty_months": 24,
+      "care_guide": "나일론 소재는 마른 천으로 관리하세요.",
+      "image_url": "",
+      "storybook": 2,
+      "created_at": "2026-08-16T00:00:00Z",
+      "updated_at": "2026-08-16T00:00:00Z",
+      "store_url": "https://kr.mcmworldwide.com/ko_KR/search?q=tote"
+    }
+  }
+]
