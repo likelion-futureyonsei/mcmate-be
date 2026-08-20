@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from django.core.files.storage import default_storage
@@ -11,9 +12,12 @@ from rest_framework.views import APIView
 from apps.common.exceptions import DomainConflict
 from apps.common.permissions import IsOwnerOrReadOnlyIfPublic
 
+from apps.storybooks.models import GeneratedStory
+from apps.storybooks.services import generate_story
+
 from .models import Memory
 from .serializers import MemoryCreateSerializer, MemorySerializer, MemoryUpdateSerializer
-from .services import distance_m, process_unlocks
+from .services import distance_m, matched_place_storybooks, process_unlocks
 
 
 class UploadView(APIView):
@@ -77,6 +81,17 @@ class MemoryListCreateView(generics.ListCreateAPIView):
 
         # 해금 판정
         unlocked = process_unlocks(memory)
+
+        # 장소 매칭 시 AI 스토리 자동 생성 (기획 결정). 실패해도 추억 저장은 성공한다
+        for storybook in matched_place_storybooks(memory):
+            if GeneratedStory.objects.filter(user=request.user, storybook=storybook).exists():
+                continue
+            try:
+                generate_story(request.user, storybook)
+            except Exception as exc:
+                logging.getLogger(__name__).warning(
+                    "AI 스토리 자동 생성 실패 (storybook=%s): %s", storybook.id, exc
+                )
 
         # 응답 구성
         payload = {
